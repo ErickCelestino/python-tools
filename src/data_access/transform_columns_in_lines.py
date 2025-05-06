@@ -1,12 +1,13 @@
 import pandas as pd
 
 class TransformColumnsInLines:
-    def __init__(self, dataFrame, fixedColumns, excelPath):
+    def __init__(self, dataFrame: pd.DataFrame, fixedColumns: list[str], excelPath: str):
         self.df = dataFrame
         self.fixedColumns = fixedColumns
         self.excelPath = excelPath
 
     def transform(self):
+        print('Passou')
         columnsForMelt = [col for col in self.df.columns if col not in self.fixedColumns]
 
         df_melted = pd.melt(
