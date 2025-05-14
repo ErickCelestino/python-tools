@@ -55,5 +55,5 @@ class SendBaseEmailsManager:
             print(f'❌ Erro ao enviar e-mail: {e}')
 
     def run(self):
-        #UpdateBaseManager().run()
+        UpdateBaseManager().run()
         self.send_email()
