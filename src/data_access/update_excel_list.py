@@ -1,3 +1,4 @@
+import time
 import win32com.client
 
 class UpdateExcelList:
@@ -6,10 +7,12 @@ class UpdateExcelList:
     
     def updateList(self):
         excel = win32com.client.Dispatch("Excel.Application")
-        excel.Visible = False
+        excel.Visible = True
 
         workbook = excel.Workbooks.Open(self.excel_path)
         workbook.RefreshAll()
+
+        time.sleep(5)
         excel.CalculateUntilAsyncQueriesDone()
         workbook.Save()
         workbook.Close(False)
