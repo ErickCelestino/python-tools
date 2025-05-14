@@ -1,54 +1,59 @@
-import pandas as pd
-from data_access import UpdateExcelList
+from email.message import EmailMessage
+import mimetypes
+import os
+import smtplib
+from .update_base import UpdateBaseManager
 
 class SendBaseEmailsManager:
-    def __init__(self):
-        self.list_to_update = [
-            {
-                'id': 1,
-                'path': r'C:\Dev\Scripts\Python\python-tools\excel\PCO_Gestores.xlsx'
-            },
-            {
-                'id': 2,
-                'path': r'C:\Dev\Scripts\Python\python-tools\excel\PCO_Conjuntos.xlsx'
-            },
-            {
-                'id': 3,
-                'path': r'C:\Dev\Scripts\Python\python-tools\excel\PCO_Referencias.xlsx'
-            }
-        ]
-    
-    def update_lists(self):
-        for row in self.list_to_update:
-            print(f'Acessando a planilha: {row['path']}')
-            updateList = UpdateExcelList(row['path'])
-            updateList.updateList()
+    def __init__(self, emails, attachment_path, subject, body):
+        # Outlook Settings (Microsoft 365)
+        self.smtp_server = 'smtp.office365.com'
+        self.smtp_port = 587
+        self.smtp_user = os.getenv("USER_EMAIL")
+        self.smtp_password = os.getenv("PASSWORD_EMAIL")
 
-    def read_bases(self):
-        for row in self.list_to_update:
-            if(row['id'] == 1):
-                print(f'Coletando dados da planilha: {row['path']}')
-                self.managers_list = pd.read_excel(row['path'])
-            elif(row['id'] == 2):
-                print(f'Coletando dados da planilha: {row['path']}')
-                self.budget_sets = pd.read_excel(row['path'])
-            elif(row['id'] == 3):
-                print(f'Coletando dados da planilha: {row['path']}')
-                self.references = pd.read_excel(row['path'])
+        # Email data
+        self.to_email = 'vp.financas@vitru.com.br'
+        self.emails = emails
+        self.subject = subject
+        self.body = body
 
-    def transform_base(self):
-        columns = ['ID', 'ID_Gerencia', 'ID_Gestor', 'Email_VP', 'Email_Gestor', 'Email_Regional', 'Gerente_Financeiro', 'Diretor_Financeiro', 'Marca', 'Filial', 'Conta', 'Verba', 'Centro_De_Custo', 'BU', 'CD_Planilha', 'VP', 'Descricao_VP', 'Grupo', 'Email', 'Email_Ferias', 'Data_Retorno_Ferias', 'De_Ferias']
-        
-        df_complete_base = self.references.merge(self.managers_list, left_on='ID_Gestor', right_on='ID', suffixes=('', '_managers'))
-        df_complete_base = df_complete_base.merge(self.budget_sets, left_on='ID_Gerencia', right_on='ID', suffixes=('', '_sets'))
-        
-        df_complete_base = df_complete_base[columns]
-        df_complete_base['De_Ferias'] = df_complete_base['De_Ferias'].map({True: 'Sim', False: 'Não'})
-        df_complete_base = df_complete_base.rename(columns={'ID_Gerencia': 'ID_Conjunto'})
-        
-        df_complete_base.to_excel("Acessos_PCO_Base_Completa.xlsx", index=False)
+        self.attachment_path = attachment_path
+
+    def send_email(self):
+        msg = EmailMessage()
+        msg['Subject'] = self.subject
+        msg['From'] = self.smtp_user
+        msg['To'] = self.to_email
+        msg['Cc'] = ', '.join(self.emails)
+        msg.set_content(self.body)
+
+        if os.path.exists(self.attachment_path):
+            file_name = os.path.basename(self.attachment_path)
+            mime_type, _ = mimetypes.guess_type(self.attachment_path)
+            mime_type = mime_type or 'application/octet-stream'
+            main_type, sub_type = mime_type.split('/', 1)
+
+            with open(self.attachment_path, 'rb') as f:
+                msg.add_attachment(f.read(),
+                                   maintype=main_type,
+                                   subtype=sub_type,
+                                   filename=file_name)
+        else:
+            print(f'⚠️ Arquivo não encontrado: {self.attachment_path}')
+            return
+
+        recipients = [self.to_email] + self.emails
+
+        try:
+            with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
+                server.starttls()
+                server.login(self.smtp_user, self.smtp_password)
+                server.send_message(msg, from_addr=self.smtp_user, to_addrs=recipients)
+                print('✅ E-mail com anexo enviado com sucesso!')
+        except Exception as e:
+            print(f'❌ Erro ao enviar e-mail: {e}')
 
     def run(self):
-        self.update_lists()
-        self.read_bases()
-        self.transform_base()
+        #UpdateBaseManager().run()
+        self.send_email()
