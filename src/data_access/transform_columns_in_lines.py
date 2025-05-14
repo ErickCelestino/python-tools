@@ -7,7 +7,6 @@ class TransformColumnsInLines:
         self.excelPath = excelPath
 
     def transform(self):
-        print('Passou')
         columnsForMelt = [col for col in self.df.columns if col not in self.fixedColumns]
 
         df_melted = pd.melt(
@@ -17,5 +16,7 @@ class TransformColumnsInLines:
             var_name='Atributo',
             value_name='Valor'
         )
-
+        
+        df_melted = df_melted.dropna(subset=['Valor'])
+        df_melted = df_melted[df_melted['Valor'].astype(str).str.strip() != ''] 
         df_melted.to_excel(self.excelPath, index=False)
