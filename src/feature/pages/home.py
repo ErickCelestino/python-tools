@@ -1,15 +1,21 @@
-from tkinter import BOTH, ttk
-from ..frame.home_frame import HomeFrame
+import flet as ft
 
-class HomePage:
+class HomePage(ft.Column):
     def __init__(self):
-        self.page_setup = HomeFrame()
-        self.page = self.page_setup.window_setup()
+        super().__init__()
+        self.alignment = ft.MainAxisAlignment.CENTER
+        self.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+        self.build()
 
-        self.render()
+    def on_click(self, e):
+        dlg = ft.AlertDialog(title=ft.Text(f"Você clicou em: {e.control.text}"))
+        self.page.dialog = dlg
+        dlg.open = True
+        self.page.update()
     
-    def render(self):
-        main_frame = ttk.Frame(self.page, padding="10")
-        main_frame.pack(fill=BOTH, expand=True)
+    def build(self):
+        nomes_botoes = ["Início", "Perfil", "Configurações", "Sair"]
         
-        self.page.mainloop()
+        for nome in nomes_botoes:
+            btn = ft.ElevatedButton(text=nome, on_click=self.on_click, width=200)
+            self.controls.append(btn)

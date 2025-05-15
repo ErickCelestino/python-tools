@@ -1,13 +1,19 @@
-from feature import HomePage
+import flet as ft
 from dotenv import load_dotenv
+from feature import HomePage
 
-def main():
+
+def main(page: ft.Page):
     load_dotenv()
-    renderPages = HomePage()
-    renderPages.render()
+    page.title = 'Teste'
 
-if __name__ == "__main__":
-    main()
+    home = HomePage()
+    page.add(home)
+
+ft.app(main)
+
+# if __name__ == "__main__":
+#     main()
 # SendBaseEmailsManager(
 #         ['erick.celestino@vitru.com.br'],
 #         'Acessos_PCO_Base_Completa.xlsx',
