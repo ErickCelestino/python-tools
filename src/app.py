@@ -12,13 +12,14 @@ class App(ft.Row):
     def navigate(self, route: str):
         if route == "home":
             self.container_content.content = HomePage()
-        
+        elif route == "report_pco":
+            self.container_content.content = HomePage()
         self.page.update()
 
     def render(self):
         self.menu = MenuBar(on_navigate=self.navigate)
         self.container_content = ft.Container(expand=True)
-        
+
         self.controls = [
             self.menu,
             self.container_content
