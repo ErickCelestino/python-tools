@@ -5,17 +5,13 @@ class HomePage(ft.Column):
         super().__init__()
         self.alignment = ft.MainAxisAlignment.CENTER
         self.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-        self.build()
 
-    def on_click(self, e):
-        dlg = ft.AlertDialog(title=ft.Text(f"Você clicou em: {e.control.text}"))
-        self.page.dialog = dlg
-        dlg.open = True
-        self.page.update()
-    
     def build(self):
-        nomes_botoes = ["Início", "Perfil", "Configurações", "Sair"]
+        print('Passou na Home')
+        text = ft.ElevatedButton(text='nome', width=200)
+        self.controls.append(text)
+        # nomes_botoes = ["Início", "Relatório PCO", "Sair"]
         
-        for nome in nomes_botoes:
-            btn = ft.ElevatedButton(text=nome, on_click=self.on_click, width=200)
-            self.controls.append(btn)
+        # for nome in nomes_botoes:
+        #     btn = ft.ElevatedButton(text=nome, on_click=self.on_click, width=200)
+        #     self.controls.append(btn)

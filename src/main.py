@@ -1,16 +1,19 @@
 import flet as ft
 from dotenv import load_dotenv
-from feature import HomePage
-
+from app import App
+from feature.pages import HomePage
 
 def main(page: ft.Page):
     load_dotenv()
-    page.title = 'Teste'
+    page.title = 'Vitru dev Tools'
+    page.window.maximized = True
+    page.horizontal_alignment = ft.CrossAxisAlignment.START
+    page.vertical_alignment = ft.MainAxisAlignment.START
 
-    home = HomePage()
-    page.add(home)
+    app = App(page)
+    page.add(app)
 
-ft.app(main)
+ft.app(target=main)
 
 # if __name__ == "__main__":
 #     main()
