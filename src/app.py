@@ -3,17 +3,18 @@ from feature.pages import HomePage, PcoReport
 from feature.components.menu_bar import MenuBar
 
 class App(ft.Row):
-    def __init__(self, page: ft.Page):
+    def __init__(self, page: ft.Page, data_dir):
         super().__init__()
         self.page = page
         self.expand = True
+        self.data_dir = data_dir
         self.render()
 
     def navigate(self, route: str):
         if route == "home":
             self.container_content.content = HomePage()
         elif route == "report_pco":
-            self.container_content.content = PcoReport(page=self.page)
+            self.container_content.content = PcoReport(page=self.page, data_dir=self.data_dir)
         self.page.update()
 
     def render(self):

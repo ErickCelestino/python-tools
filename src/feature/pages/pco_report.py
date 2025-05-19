@@ -1,27 +1,55 @@
+import json
 import flet as ft
 from typing import Optional
+import os
+from pathlib import Path
 
 from feature.components.handlers import EmailDialogHandler
 from feature.components.managers import DialogManager
 
-list_test = [
-    {
-        'id': '1',
-        'created_at': '26/04/2025',
-        'email': 'erickcelestimo@gmail.com'
-    }
-]
 class PcoReport(ft.Column):
-    def __init__(self, page: Optional[ft.Page] = None):
+    def __init__(self, page: Optional[ft.Page] = None, data_dir = ''):
         super().__init__()
         self.page = page
-        self.email_list = list_test.copy()
+        self.data_dir = data_dir
+        self.data_file = os.path.join(self.data_dir, "emails.json")
+        self.email_list = self.load_emails()
         
         self.dialog_manager = DialogManager(page)
         self.email_dialog_handler = EmailDialogHandler(
             dialog_manager=self.dialog_manager,
-            refresh_callback=self.refresh_list
+            refresh_callback=self.refresh_list_and_save
         )
+    
+    def ensure_data_dir_exists(self):
+        """Ensures the data directory exists"""
+        Path(self.data_dir).mkdir(parents=True, exist_ok=True)
+
+    def load_emails(self) -> list:
+        """Loads emails from JSON file or returns empty list if none exists"""
+        try:
+            self.ensure_data_dir_exists() 
+            if os.path.exists(self.data_file):
+                with open(self.data_file, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+        except (json.JSONDecodeError, IOError) as e:
+            print(f"Erro ao carregar emails: {e}")
+
+        return []
+    
+    def refresh_list_and_save(self) -> None:
+        """Updates the list and saves it to the JSON file"""
+        self.save_emails()
+        self.refresh_list()
+    
+    def save_emails(self) -> None:
+        """Saves email list to JSON file, creating folder if necessary"""
+        try:
+            self.ensure_data_dir_exists() 
+            with open(self.data_file, 'w', encoding='utf-8') as f:
+                json.dump(self.email_list, f, ensure_ascii=False, indent=4)
+        except IOError as e:
+            print(f"Erro ao salvar emails: {e}")
     
     def refresh_list(self) -> None:
         self.controls.clear()

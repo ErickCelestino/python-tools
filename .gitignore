@@ -159,6 +159,8 @@ dmypy.json
 
 /excel
 
+/data
+
 # Cython debug symbols
 cython_debug/
 
