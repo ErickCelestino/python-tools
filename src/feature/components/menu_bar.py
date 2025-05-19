@@ -18,7 +18,7 @@ class MenuBar(ft.Column):
             {
                 'title': 'Relatorio PCO',
                 'route': 'report_pco',
-                'icon': ft.Icons.DOCUMENT_SCANNER_ROUNDED,
+                'icon': ft.Icons.DOCUMENT_SCANNER_OUTLINED,
                 'icon_selected': ft.Icons.DOCUMENT_SCANNER
             }
         ]

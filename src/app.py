@@ -1,5 +1,5 @@
 import flet as ft
-from feature.pages import HomePage
+from feature.pages import HomePage, PcoReport
 from feature.components.menu_bar import MenuBar
 
 class App(ft.Row):
@@ -13,7 +13,7 @@ class App(ft.Row):
         if route == "home":
             self.container_content.content = HomePage()
         elif route == "report_pco":
-            self.container_content.content = HomePage()
+            self.container_content.content = PcoReport()
         self.page.update()
 
     def render(self):
@@ -22,6 +22,7 @@ class App(ft.Row):
 
         self.controls = [
             self.menu,
+            ft.VerticalDivider(width=1),
             self.container_content
         ]
 
