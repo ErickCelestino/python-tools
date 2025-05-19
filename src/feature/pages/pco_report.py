@@ -11,79 +11,122 @@ list_test = [
 class PcoReport(ft.Column):
     def __init__(self, page=None):
         super().__init__()
-        self.page = page  # Armazena a referência à página
-        self.dlg_modal = None
-        self.delete_dlg = None 
-        self.selected_item = None 
+        self.page = page
+        self.selected_item = None
+        self.email_list = list_test
     
-    def _redirect(self, e):
-        print('Ação')
-    
-    def close_dlg(self, e):
-        self.dlg_modal.open = False
-        self.page.update()
+    def open_add_modal(self, e):
+        def dismiss_dialog(e):
+            cupertino_alert_dialog.open = False
+            e.control.page.update()
 
-    def close_delete_dlg(self, e):
-        self.delete_dlg.open = False
-        self.page.update()
+        def save_item(e):
+            text_field = cupertino_alert_dialog.content.content
+            new_email = text_field.value
+            print(new_email)
+            if self.selected_item:
+                self.selected_item["email"] = new_email
+            dismiss_dialog(e)
+            self.refresh_list()
     
-    def open_dlg_modal(self, e, item=None):
-        self.selected_item = item
-        self.dlg_modal = ft.AlertDialog(
-            modal=True,
-            title=ft.Text("Editar Email"),
-            content=ft.TextField(
-                value=item["email"] if item else "",
-                label="Email",
-                autofocus=True
+        cupertino_alert_dialog = ft.CupertinoAlertDialog(
+            title=ft.Text("Cadastrar Email"),
+            content=ft.Container(
+                ft.TextField(
+                    label="Email",
+                    autofocus=True
+                ),
+                height=80,
+                alignment=ft.alignment.center,
             ),
             actions=[
-                ft.TextButton("Salvar", on_click=self.save_item),
-                ft.TextButton("Cancelar", on_click=self.close_dlg),
+                ft.CupertinoDialogAction("Salvar", on_click=save_item),
+                ft.CupertinoDialogAction("Cancelar", on_click=dismiss_dialog),
             ],
-            actions_alignment=ft.MainAxisAlignment.END,
         )
-        self.page.dialog = self.dlg_modal  # Corrigido typo: dialog -> dialog
-        self.dlg_modal.open = True
-        self.page.update()
-
-    def save_item(self, e):
-        new_email = self.dlg_modal.content.value
-        if self.selected_item:
-            self.selected_item["email"] = new_email
-        self.close_dlg(e)
-        # Atualiza a lista de forma mais eficiente
-        self.controls[0].content.controls = self.render_list().content.controls
-        self.page.update()
-
-    def open_delete_dialog(self, e, item):
-        self.selected_item = item
-        self.delete_dlg = ft.AlertDialog(
-            modal=True,
-            title=ft.Text("Confirmar exclusão"),
-            content=ft.Text(f"Tem certeza que deseja excluir o email {item['email']}?"),
-            actions=[
-                ft.TextButton("Sim", on_click=self.delete_item),
-                ft.TextButton("Não", on_click=self.close_delete_dlg),
-            ],
-            actions_alignment=ft.MainAxisAlignment.END,
-        )
-        self.page.dialog = self.delete_dlg
-        self.delete_dlg.open = True
-        self.page.update()
     
-    def delete_item(self, e):
-        if self.selected_item:
-            # Remove o item da lista
-            list_test[:] = [item for item in list_test if item['id'] != self.selected_item['id']]
-        self.close_delete_dlg(e)
-        # Atualiza a lista de forma mais eficiente
-        self.controls[0].content.controls = self.render_list().content.controls
+        e.control.page.overlay.append(cupertino_alert_dialog)
+        cupertino_alert_dialog.open = True
+        e.control.page.update()
+    
+    def open_edit_modal(self, e, item):
+        self.selected_item = item
+        def dismiss_dialog(e):
+            cupertino_alert_dialog.open = False
+            e.control.page.update()
+
+        def save_item(e):
+            text_field = cupertino_alert_dialog.content.content
+            new_email = text_field.value
+            print(new_email)
+            if self.selected_item:
+                self.selected_item["email"] = new_email
+            dismiss_dialog(e)
+            self.refresh_list()
+
+        cupertino_alert_dialog = ft.CupertinoAlertDialog(
+            title=ft.Text("Editar Email"),
+            content=ft.Container(
+                ft.TextField(
+                    value=item["email"],
+                    label="Email",
+                    autofocus=True
+                ),
+                height=80,
+                alignment=ft.alignment.center,
+            ),
+            actions=[
+                ft.CupertinoDialogAction("Salvar", on_click=save_item),
+                ft.CupertinoDialogAction("Cancelar", on_click=dismiss_dialog),
+            ],
+        )
+
+        e.control.page.overlay.append(cupertino_alert_dialog)
+        cupertino_alert_dialog.open = True
+        e.control.page.update()
+
+    def open_delete_modal(self, e, item):
+        self.selected_item = item
+
+        def dismiss_dialog(e):
+            cupertino_alert_dialog.open = False
+            e.control.page.update()
+
+        def delete_email(e):
+            if self.selected_item:
+                self.email_list[:] = [item for item in self.email_list if item['id'] != self.selected_item['id']]
+            cupertino_alert_dialog.open = False
+            self.refresh_list()
+            e.control.page.update()
+    
+        cupertino_alert_dialog = ft.CupertinoAlertDialog(
+            title=ft.Text("Deletar Email"),
+            content=ft.Text(
+                spans=[
+                    ft.TextSpan(text="Você tem certeza que deseja deletar o email "),
+                    ft.TextSpan(text=item['email'], style=ft.TextStyle(weight=ft.FontWeight.BOLD)),
+                    ft.TextSpan(text="?")
+                ]
+            ),
+            actions=[
+                ft.CupertinoDialogAction(
+                    "OK", is_destructive_action=True, on_click=delete_email
+                ),
+                ft.CupertinoDialogAction(text="Cancel", on_click=dismiss_dialog),
+            ],
+        )
+        e.control.page.overlay.append(cupertino_alert_dialog)
+        cupertino_alert_dialog.open = True
+        e.control.page.update()
+
+    def refresh_list(self):
+        self.controls.clear()
+        self.build()
         self.page.update()
 
     def render_list(self):
         tiles = []
-        for item in list_test:
+        for item in self.email_list:
             tile = ft.CupertinoListTile(
                 additional_info=ft.Text(item['created_at']),
                 bgcolor_activated=ft.Colors.AMBER_ACCENT,
@@ -95,13 +138,13 @@ class PcoReport(ft.Column):
                             icon=ft.Icons.EDIT,
                             icon_color="blue",
                             tooltip="Editar",
-                            on_click=lambda e, item=item: self.open_dlg_modal(e, item)
+                            on_click=lambda e, item=item: self.open_edit_modal(e, item)
                         ),
                         ft.IconButton(
                             icon=ft.Icons.DELETE,
                             icon_color="red",
                             tooltip="Excluir",
-                            on_click=lambda e, item=item: self.open_delete_dialog(e, item)
+                            on_click=lambda e, item=item: self.open_delete_modal(e, item)
                         ),
                     ],
                     spacing=5,
@@ -123,11 +166,10 @@ class PcoReport(ft.Column):
                     actions=[
                         ft.IconButton(
                             ft.Icons.ADD_CIRCLE,
-                            on_click=self._redirect
+                            on_click=self.open_add_modal
                         ),
                     ]
                 ),
-                content=self.render_list(),
+                content=self.render_list()
             )
         )
-        return self

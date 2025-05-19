@@ -13,7 +13,7 @@ class App(ft.Row):
         if route == "home":
             self.container_content.content = HomePage()
         elif route == "report_pco":
-            self.container_content.content = PcoReport()
+            self.container_content.content = PcoReport(page=self.page)
         self.page.update()
 
     def render(self):
