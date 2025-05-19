@@ -1,5 +1,5 @@
 import flet as ft
-from typing import Optional, List, Callable
+from typing import List
 
 class DialogManager:
     def __init__(self, page: ft.Page):
@@ -9,8 +9,7 @@ class DialogManager:
         self,
         title: str,
         content: ft.Control,
-        actions: List[ft.Control],
-        on_dismiss: Optional[Callable] = None
+        actions: List[ft.Control]
     ) -> ft.CupertinoAlertDialog:
         dialog = ft.CupertinoAlertDialog(
             title=ft.Text(title),

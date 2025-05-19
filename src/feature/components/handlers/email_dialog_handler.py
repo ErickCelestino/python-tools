@@ -1,5 +1,6 @@
 import flet as ft
 from typing import Optional, Dict, List, Callable
+from datetime import datetime
 from ..managers import DialogManager
 
 class EmailDialogHandler:
@@ -24,9 +25,10 @@ class EmailDialogHandler:
         
         def save_item(e: ft.ControlEvent):
             new_email = content.content.value
+            current_time = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
             email_list.append({
                 'id': str(len(email_list) + 1),
-                'created_at': '26/04/2025',
+                'created_at': current_time,
                 'email': new_email
             })
             self.dialog_manager.dismiss_dialog(dialog, e)
