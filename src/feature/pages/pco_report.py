@@ -1,4 +1,8 @@
 import flet as ft
+from typing import Optional
+
+from feature.components.handlers import EmailDialogHandler
+from feature.components.managers import DialogManager
 
 list_test = [
     {
@@ -7,124 +11,24 @@ list_test = [
         'email': 'erickcelestimo@gmail.com'
     }
 ]
-
 class PcoReport(ft.Column):
-    def __init__(self, page=None):
+    def __init__(self, page: Optional[ft.Page] = None):
         super().__init__()
         self.page = page
-        self.selected_item = None
-        self.email_list = list_test
-    
-    def open_add_modal(self, e):
-        def dismiss_dialog(e):
-            cupertino_alert_dialog.open = False
-            e.control.page.update()
-
-        def save_item(e):
-            text_field = cupertino_alert_dialog.content.content
-            new_email = text_field.value
-            print(new_email)
-            if self.selected_item:
-                self.selected_item["email"] = new_email
-            dismiss_dialog(e)
-            self.refresh_list()
-    
-        cupertino_alert_dialog = ft.CupertinoAlertDialog(
-            title=ft.Text("Cadastrar Email"),
-            content=ft.Container(
-                ft.TextField(
-                    label="Email",
-                    autofocus=True
-                ),
-                height=80,
-                alignment=ft.alignment.center,
-            ),
-            actions=[
-                ft.CupertinoDialogAction("Salvar", on_click=save_item),
-                ft.CupertinoDialogAction("Cancelar", on_click=dismiss_dialog),
-            ],
+        self.email_list = list_test.copy()
+        
+        self.dialog_manager = DialogManager(page)
+        self.email_dialog_handler = EmailDialogHandler(
+            dialog_manager=self.dialog_manager,
+            refresh_callback=self.refresh_list
         )
     
-        e.control.page.overlay.append(cupertino_alert_dialog)
-        cupertino_alert_dialog.open = True
-        e.control.page.update()
-    
-    def open_edit_modal(self, e, item):
-        self.selected_item = item
-        def dismiss_dialog(e):
-            cupertino_alert_dialog.open = False
-            e.control.page.update()
-
-        def save_item(e):
-            text_field = cupertino_alert_dialog.content.content
-            new_email = text_field.value
-            print(new_email)
-            if self.selected_item:
-                self.selected_item["email"] = new_email
-            dismiss_dialog(e)
-            self.refresh_list()
-
-        cupertino_alert_dialog = ft.CupertinoAlertDialog(
-            title=ft.Text("Editar Email"),
-            content=ft.Container(
-                ft.TextField(
-                    value=item["email"],
-                    label="Email",
-                    autofocus=True
-                ),
-                height=80,
-                alignment=ft.alignment.center,
-            ),
-            actions=[
-                ft.CupertinoDialogAction("Salvar", on_click=save_item),
-                ft.CupertinoDialogAction("Cancelar", on_click=dismiss_dialog),
-            ],
-        )
-
-        e.control.page.overlay.append(cupertino_alert_dialog)
-        cupertino_alert_dialog.open = True
-        e.control.page.update()
-
-    def open_delete_modal(self, e, item):
-        self.selected_item = item
-
-        def dismiss_dialog(e):
-            cupertino_alert_dialog.open = False
-            e.control.page.update()
-
-        def delete_email(e):
-            if self.selected_item:
-                self.email_list[:] = [item for item in self.email_list if item['id'] != self.selected_item['id']]
-            cupertino_alert_dialog.open = False
-            self.refresh_list()
-            e.control.page.update()
-    
-        cupertino_alert_dialog = ft.CupertinoAlertDialog(
-            title=ft.Text("Deletar Email"),
-            content=ft.Text(
-                spans=[
-                    ft.TextSpan(text="Você tem certeza que deseja deletar o email "),
-                    ft.TextSpan(text=item['email'], style=ft.TextStyle(weight=ft.FontWeight.BOLD)),
-                    ft.TextSpan(text="?")
-                ]
-            ),
-            actions=[
-                ft.CupertinoDialogAction(
-                    "OK", is_destructive_action=True, on_click=delete_email
-                ),
-                ft.CupertinoDialogAction(text="Cancel", on_click=dismiss_dialog),
-            ],
-        )
-        e.control.page.overlay.append(cupertino_alert_dialog)
-        cupertino_alert_dialog.open = True
-        e.control.page.update()
-
-    def refresh_list(self):
+    def refresh_list(self) -> None:
         self.controls.clear()
         self.build()
         self.page.update()
-
-    def render_list(self):
+    
+    def render_list(self) -> ft.Container:
         tiles = []
         for item in self.email_list:
             tile = ft.CupertinoListTile(
@@ -138,13 +42,13 @@ class PcoReport(ft.Column):
                             icon=ft.Icons.EDIT,
                             icon_color="blue",
                             tooltip="Editar",
-                            on_click=lambda e, item=item: self.open_edit_modal(e, item)
+                            on_click=lambda e, item=item: self.email_dialog_handler.open_edit_modal(e, item)
                         ),
                         ft.IconButton(
                             icon=ft.Icons.DELETE,
                             icon_color="red",
                             tooltip="Excluir",
-                            on_click=lambda e, item=item: self.open_delete_modal(e, item)
+                            on_click=lambda e, item=item: self.email_dialog_handler.open_delete_modal(e, item, self.email_list)
                         ),
                     ],
                     spacing=5,
@@ -154,8 +58,8 @@ class PcoReport(ft.Column):
             tiles.append(tile)
 
         return ft.Container(content=ft.Column(controls=tiles))
-
-    def build(self):
+    
+    def build(self) -> None:
         self.controls.append(
             ft.Pagelet(
                 appbar=ft.AppBar(
@@ -166,7 +70,7 @@ class PcoReport(ft.Column):
                     actions=[
                         ft.IconButton(
                             ft.Icons.ADD_CIRCLE,
-                            on_click=self.open_add_modal
+                            on_click=lambda e: self.email_dialog_handler.open_add_modal(e, self.email_list)
                         ),
                     ]
                 ),
