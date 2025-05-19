@@ -14,6 +14,8 @@ class PcoReport(ft.Column):
         self.data_dir = data_dir
         self.data_file = os.path.join(self.data_dir, "emails.json")
         self.email_list = self.load_emails()
+        self.current_page = 1
+        self.items_per_page = 10
         
         self.dialog_manager = DialogManager(page)
         self.email_dialog_handler = EmailDialogHandler(
@@ -57,8 +59,12 @@ class PcoReport(ft.Column):
         self.page.update()
     
     def render_list(self) -> ft.Container:
+        start_index = (self.current_page - 1) * self.items_per_page
+        end_index = start_index + self.items_per_page
+        paginated_items = self.email_list[start_index:end_index]
+
         tiles = []
-        for item in self.email_list:
+        for item in paginated_items:
             tile = ft.CupertinoListTile(
                 additional_info=ft.Text(item['created_at']),
                 bgcolor_activated=ft.Colors.AMBER_ACCENT,
@@ -84,8 +90,39 @@ class PcoReport(ft.Column):
                 )
             )
             tiles.append(tile)
+        
+        total_pages = max(1, (len(self.email_list) + self.items_per_page - 1) // self.items_per_page)
 
-        return ft.Container(content=ft.Column(controls=tiles))
+        pagination_controls = ft.Row(
+            alignment=ft.MainAxisAlignment.CENTER,
+            controls=[
+                ft.IconButton(
+                    icon=ft.Icons.ARROW_BACK,
+                    on_click=lambda e: self.change_page(self.current_page - 1),
+                    disabled=self.current_page == 1
+                ),
+                ft.Text(f"Página {self.current_page} de {total_pages}"),
+                ft.IconButton(
+                    icon=ft.Icons.ARROW_FORWARD,
+                    on_click=lambda e: self.change_page(self.current_page + 1),
+                    disabled=self.current_page == total_pages
+                ),
+            ],
+            spacing=20
+        )
+
+        return ft.Container(
+            content=ft.Column(
+                controls=[
+                    ft.Column(controls=tiles, scroll=ft.ScrollMode.ALWAYS),
+                    pagination_controls
+                ]
+            )
+        )
+
+    def change_page(self, new_page):
+        self.current_page = new_page
+        self.refresh_list()
     
     def build(self) -> None:
         self.controls.append(
