@@ -1,8 +1,9 @@
-from email.message import EmailMessage
 import mimetypes
 import os
 import smtplib
+import pythoncom
 from .update_base import UpdateBaseManager
+from email.message import EmailMessage
 
 class SendBaseEmailsManager:
     def __init__(self, emails, attachment_path, subject, body):
@@ -55,5 +56,9 @@ class SendBaseEmailsManager:
             print(f'❌ Erro ao enviar e-mail: {e}')
 
     def run(self):
-        UpdateBaseManager().run()
-        self.send_email()
+        pythoncom.CoInitialize()
+        try:
+            UpdateBaseManager().run()
+            self.send_email()
+        finally:
+            pythoncom.CoUninitialize()

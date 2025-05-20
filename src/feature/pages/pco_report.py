@@ -1,5 +1,6 @@
+import threading
 import flet as ft
-from typing import Dict, List, Optional
+from typing import Optional
 
 from feature.components.handlers import EmailDialogHandler
 from feature.components.managers import DialogManager
@@ -14,6 +15,12 @@ class PcoReport(ft.Column):
 
         self.repo = EmailRepository(data_dir)
         self.email_list = self.repo.load_emails()
+        self.loading_indicator = ft.ProgressRing(
+            visible=False,
+            width=50,
+            height=50,
+            stroke_width=5
+        )
         
         self.dialog_manager = DialogManager(page)
         self.email_dialog_handler = EmailDialogHandler(
@@ -35,9 +42,24 @@ class PcoReport(ft.Column):
     def change_page(self, new_page):
         self.current_page = new_page
         self.refresh_list()
-
-    def send_emails(self, e: ft.ControlEvent, email_list: List[Dict]):
-        print('Enviou o email')
+    
+    def send_report_with_loading(self, e):
+        self.loading_indicator.visible = True
+        self.page.update()
+        emails = []
+        for item in self.email_list:
+            emails.append(item['email'])
+        
+        def task():
+            try:
+                self.repo.generate_report(emails)
+            except Exception as err:
+                print(f"Erro ao enviar relatório: {err}")
+            finally:
+                self.loading_indicator.visible = False
+                self.page.update()
+                
+        threading.Thread(target=task, daemon=True).start()
         
     def render_list(self) -> ft.Container:
         start_index = (self.current_page - 1) * self.items_per_page
@@ -114,7 +136,7 @@ class PcoReport(ft.Column):
                             ft.Icons.MAIL_SHARP,
                             icon_size=25,
                             tooltip='Enviar Relatório',
-                            on_click=lambda e: self.send_emails(e, self.email_list)
+                            on_click=self.send_report_with_loading
                         ),
                         ft.IconButton(
                             ft.Icons.ADD_CIRCLE,
@@ -124,6 +146,14 @@ class PcoReport(ft.Column):
                         ),
                     ]
                 ),
-                content=self.render_list()
+                content=ft.Column(
+                    controls=[
+                        self.render_list(),
+                        ft.Row(
+                            controls=[self.loading_indicator],
+                            alignment=ft.MainAxisAlignment.CENTER
+                        )
+                    ]
+                )
             )
         )

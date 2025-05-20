@@ -1,6 +1,10 @@
 import json
 import os
 from pathlib import Path
+import time
+from typing import Dict, List
+
+from domain.use_cases import SendBaseEmailsManager
 
 class EmailRepository:
     def __init__(self, data_dir: str):
@@ -26,3 +30,12 @@ class EmailRepository:
                 json.dump(email_list, f, ensure_ascii=False, indent=4)
         except IOError as e:
             print(f"Erro ao salvar emails: {e}")
+
+    def generate_report(self, email_list: List[Dict]):
+        print('Enviando o email')
+        SendBaseEmailsManager(
+            email_list,
+            'Acessos_PCO_Base_Completa.xlsx',
+            'Relatório PCO Base Completa',
+            'Olá,\n\nEste é um e-mail enviado automaticamente via Outlook.\n\nAtt,\nVP Finanças',
+        ).run()
