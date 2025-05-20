@@ -19,6 +19,7 @@ class PcoReport(ft.Column):
         
         self.dialog_manager = DialogManager(page)
         self.email_dialog_handler = EmailDialogHandler(
+            page,
             dialog_manager=self.dialog_manager,
             refresh_callback=self.refresh_list_and_save
         )
