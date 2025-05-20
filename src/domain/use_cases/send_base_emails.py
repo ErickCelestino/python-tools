@@ -2,8 +2,12 @@ import mimetypes
 import os
 import smtplib
 import pythoncom
-from .update_base import UpdateBaseManager
+import logging
 from email.message import EmailMessage
+from .update_base import UpdateBaseManager
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class SendBaseEmailsManager:
     def __init__(self, emails, attachment_path, subject, body, notify_callback=None):
@@ -47,7 +51,7 @@ class SendBaseEmailsManager:
                                    filename=file_name)
         else:
             warning_message = f'⚠️ Arquivo não encontrado: {self.attachment_path}'
-            print(warning_message)
+            logger.warning(warning_message)
             self.notify(msg, bgcolor='yellow', text_color='black')
             return
 
@@ -59,11 +63,11 @@ class SendBaseEmailsManager:
                 server.login(self.smtp_user, self.smtp_password)
                 server.send_message(msg, from_addr=self.smtp_user, to_addrs=recipients)
                 sucess_message = '✅ E-mail com anexo enviado com sucesso!'
-                print(sucess_message)
+                logger.info(sucess_message)
                 self.notify(sucess_message, bgcolor='green')
         except Exception as e:
             error_msg = f'❌ Erro ao enviar e-mail: {e}'
-            print(error_msg)
+            logger.error(error_msg)
             self.notify(error_msg, bgcolor='red')
 
     def run(self):

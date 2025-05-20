@@ -1,4 +1,3 @@
-import threading
 import flet as ft
 from typing import Optional
 
@@ -6,13 +5,12 @@ from feature.components.handlers import EmailDialogHandler
 from feature.components.managers import DialogManager, NotificationManager
 from feature.components.repositories import EmailRepository
 from feature.components.navigations import PcoAppBar
+from feature.components.lists import PcoListEmails
 
 class PcoReport(ft.Column):
     def __init__(self, notification: NotificationManager, page: Optional[ft.Page] = None, data_dir: str = ''):
         super().__init__()
         self.page = page
-        self.current_page = 1
-        self.items_per_page = 10
         self.notification = notification
 
         self.repo = EmailRepository(data_dir, self.notification)
@@ -42,81 +40,16 @@ class PcoReport(ft.Column):
         self.controls.clear()
         self.build()
         self.page.update()
-    
-    def change_page(self, new_page):
-        self.current_page = new_page
-        self.refresh_list()
-        
-    def render_list(self) -> ft.Container:
-        start_index = (self.current_page - 1) * self.items_per_page
-        end_index = start_index + self.items_per_page
-        paginated_items = self.email_list[start_index:end_index]
 
-        tiles = []
-        for item in paginated_items:
-            tile = ft.CupertinoListTile(
-                additional_info=ft.Text(item['created_at']),
-                bgcolor_activated=ft.Colors.AMBER_ACCENT,
-                leading=ft.Icon(name=ft.CupertinoIcons.MAIL),
-                title=ft.Text(item['email']),
-                trailing=ft.Row(
-                    controls=[
-                        ft.IconButton(
-                            icon=ft.Icons.EDIT,
-                            icon_color="blue",
-                            tooltip="Editar",
-                            on_click=lambda e, item=item: self.email_dialog_handler.open_edit_modal(e, item)
-                        ),
-                        ft.IconButton(
-                            icon=ft.Icons.DELETE,
-                            icon_color="red",
-                            tooltip="Excluir",
-                            on_click=lambda e, item=item: self.email_dialog_handler.open_delete_modal(e, item, self.email_list)
-                        ),
-                    ],
-                    spacing=5,
-                    alignment=ft.MainAxisAlignment.END,
-                )
-            )
-            tiles.append(tile)
-        
-        total_pages = max(1, (len(self.email_list) + self.items_per_page - 1) // self.items_per_page)
-
-        pagination_controls = ft.Row(
-            alignment=ft.MainAxisAlignment.CENTER,
-            controls=[
-                ft.IconButton(
-                    icon=ft.Icons.ARROW_BACK,
-                    on_click=lambda e: self.change_page(self.current_page - 1),
-                    disabled=self.current_page == 1
-                ),
-                ft.Text(f"Página {self.current_page} de {total_pages}"),
-                ft.IconButton(
-                    icon=ft.Icons.ARROW_FORWARD,
-                    on_click=lambda e: self.change_page(self.current_page + 1),
-                    disabled=self.current_page == total_pages
-                ),
-            ],
-            spacing=20
-        )
-
-        return ft.Container(
-            content=ft.Column(
-                controls=[
-                    ft.Column(controls=tiles, scroll=ft.ScrollMode.ALWAYS),
-                    pagination_controls
-                ]
-            )
-        )
-    
     def build(self) -> None:
-        appBar = PcoAppBar(self.email_dialog_handler, self.repo, self.loading_indicator, self.email_list)
+        appBar = PcoAppBar(self.email_dialog_handler, self.repo, self.loading_indicator, self.email_list, self.page)
+        emailsList = PcoListEmails(self.email_list, self.email_dialog_handler, self.refresh_list, self.page)
         self.controls.append(
             ft.Pagelet(
                 appbar=appBar.build(),
                 content=ft.Column(
                     controls=[
-                        self.render_list(),
+                        emailsList.render_list(),
                         ft.Row(
                             controls=[self.loading_indicator],
                             alignment=ft.MainAxisAlignment.CENTER

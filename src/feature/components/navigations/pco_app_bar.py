@@ -1,16 +1,18 @@
 import threading
+from typing import Optional
 import flet as ft
 
 from feature.components.handlers import EmailDialogHandler
 from feature.components.repositories import EmailRepository
 
 class PcoAppBar(ft.Column):
-    def __init__(self, email_dialog_handler: EmailDialogHandler, repo: EmailRepository, loading_indicator: ft.ProgressRing, email_list: list):
+    def __init__(self, email_dialog_handler: EmailDialogHandler, repo: EmailRepository, loading_indicator: ft.ProgressRing, email_list: list, page: Optional[ft.Page] = None):
         super().__init__()
         self.email_dialog_handler = email_dialog_handler
         self.repo = repo
         self.loading_indicator = loading_indicator
         self.email_list = email_list
+        self.page = page
 
     def send_report_with_loading(self, e):
         self.loading_indicator.visible = True

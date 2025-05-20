@@ -1,6 +1,6 @@
 import flet as ft
 from feature.pages import HomePage, PcoReport
-from feature.components.menu_bar import MenuBar
+from feature.components.navigations import MenuBar
 from feature.components.managers import NotificationManager
 
 class App(ft.Row):
