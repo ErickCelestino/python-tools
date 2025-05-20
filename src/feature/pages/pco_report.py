@@ -3,7 +3,7 @@ import flet as ft
 from typing import Optional
 
 from feature.components.handlers import EmailDialogHandler
-from feature.components.managers import DialogManager
+from feature.components.managers import DialogManager, NotificationManager
 from feature.components.repositories import EmailRepository
 
 class PcoReport(ft.Column):
@@ -23,9 +23,11 @@ class PcoReport(ft.Column):
         )
         
         self.dialog_manager = DialogManager(page)
+        self.notification_manager = NotificationManager(page)
         self.email_dialog_handler = EmailDialogHandler(
             page,
             dialog_manager=self.dialog_manager,
+            notification_manager=self.notification_manager,
             refresh_callback=self.refresh_list_and_save
         )
     

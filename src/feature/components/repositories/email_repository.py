@@ -1,7 +1,6 @@
 import json
 import os
 from pathlib import Path
-import time
 from typing import Dict, List
 
 from domain.use_cases import SendBaseEmailsManager

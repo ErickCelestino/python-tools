@@ -2,12 +2,13 @@ import re
 import flet as ft
 from typing import Optional, Dict, List, Callable
 from datetime import datetime
-from ..managers import DialogManager
+from ..managers import DialogManager, NotificationManager
 
 class EmailDialogHandler:
-    def __init__(self, page: ft.Page, dialog_manager: DialogManager, refresh_callback: Callable):
+    def __init__(self, page: ft.Page, dialog_manager: DialogManager, notification_manager: NotificationManager, refresh_callback: Callable):
         self.page = page
         self.dialog_manager = dialog_manager
+        self.notification_manager = notification_manager
         self.refresh_callback = refresh_callback
         self.selected_item: Optional[Dict] = None
     
@@ -26,15 +27,6 @@ class EmailDialogHandler:
         padrao = r'^[\w\.-]+@[\w\.-]+\.\w{2,}$'
         return re.match(padrao, email) is not None
     
-    def _show_error_snackbar(self, message: str) -> None:
-        snackbar = ft.SnackBar(
-            ft.Text(message, color='white'),
-            bgcolor='red'
-        )
-        self.page.overlay.append(snackbar)
-        snackbar.open = True
-        self.page.update()
-    
     def _create_dialog(self, title: str, content: ft.Control, actions: List[ft.Control]) -> ft.Control:
         return self.dialog_manager.create_dialog(
             title=title,
@@ -44,7 +36,7 @@ class EmailDialogHandler:
     
     def _handle_save_email(self, dialog: ft.Control, e: ft.ControlEvent, email: str, email_list: List[Dict], is_edit: bool = False) -> None:
         if not self.valid_email(email):
-            self._show_error_snackbar('E-mail inválido!')
+            self.notification_manager.show_notification('E-mail inválido!', 'red')
             return
 
         if is_edit and self.selected_item:
