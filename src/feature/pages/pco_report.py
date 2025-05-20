@@ -1,21 +1,19 @@
-import json
 import flet as ft
-from typing import Optional
-import os
-from pathlib import Path
+from typing import Dict, List, Optional
 
 from feature.components.handlers import EmailDialogHandler
 from feature.components.managers import DialogManager
+from feature.components.repositories import EmailRepository
 
 class PcoReport(ft.Column):
-    def __init__(self, page: Optional[ft.Page] = None, data_dir = ''):
+    def __init__(self, page: Optional[ft.Page] = None, data_dir: str = ''):
         super().__init__()
         self.page = page
-        self.data_dir = data_dir
-        self.data_file = os.path.join(self.data_dir, "emails.json")
-        self.email_list = self.load_emails()
         self.current_page = 1
         self.items_per_page = 10
+
+        self.repo = EmailRepository(data_dir)
+        self.email_list = self.repo.load_emails()
         
         self.dialog_manager = DialogManager(page)
         self.email_dialog_handler = EmailDialogHandler(
@@ -24,41 +22,23 @@ class PcoReport(ft.Column):
             refresh_callback=self.refresh_list_and_save
         )
     
-    def ensure_data_dir_exists(self):
-        """Ensures the data directory exists"""
-        Path(self.data_dir).mkdir(parents=True, exist_ok=True)
-
-    def load_emails(self) -> list:
-        """Loads emails from JSON file or returns empty list if none exists"""
-        try:
-            self.ensure_data_dir_exists() 
-            if os.path.exists(self.data_file):
-                with open(self.data_file, 'r', encoding='utf-8') as f:
-                    return json.load(f)
-        except (json.JSONDecodeError, IOError) as e:
-            print(f"Erro ao carregar emails: {e}")
-
-        return []
-    
     def refresh_list_and_save(self) -> None:
         """Updates the list and saves it to the JSON file"""
-        self.save_emails()
+        self.repo.save_emails(self.email_list)
         self.refresh_list()
-    
-    def save_emails(self) -> None:
-        """Saves email list to JSON file, creating folder if necessary"""
-        try:
-            self.ensure_data_dir_exists() 
-            with open(self.data_file, 'w', encoding='utf-8') as f:
-                json.dump(self.email_list, f, ensure_ascii=False, indent=4)
-        except IOError as e:
-            print(f"Erro ao salvar emails: {e}")
     
     def refresh_list(self) -> None:
         self.controls.clear()
         self.build()
         self.page.update()
     
+    def change_page(self, new_page):
+        self.current_page = new_page
+        self.refresh_list()
+
+    def send_emails(self, e: ft.ControlEvent, email_list: List[Dict]):
+        print('Enviou o email')
+        
     def render_list(self) -> ft.Container:
         start_index = (self.current_page - 1) * self.items_per_page
         end_index = start_index + self.items_per_page
@@ -120,10 +100,6 @@ class PcoReport(ft.Column):
                 ]
             )
         )
-
-    def change_page(self, new_page):
-        self.current_page = new_page
-        self.refresh_list()
     
     def build(self) -> None:
         self.controls.append(
@@ -135,7 +111,15 @@ class PcoReport(ft.Column):
                     center_title=False,
                     actions=[
                         ft.IconButton(
+                            ft.Icons.MAIL_SHARP,
+                            icon_size=25,
+                            tooltip='Enviar Relatório',
+                            on_click=lambda e: self.send_emails(e, self.email_list)
+                        ),
+                        ft.IconButton(
                             ft.Icons.ADD_CIRCLE,
+                            icon_size=25,
+                            tooltip='Adicionar Email',
                             on_click=lambda e: self.email_dialog_handler.open_add_modal(e, self.email_list)
                         ),
                     ]
