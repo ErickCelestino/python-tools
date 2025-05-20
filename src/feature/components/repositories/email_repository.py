@@ -4,10 +4,12 @@ from pathlib import Path
 from typing import Dict, List
 
 from domain.use_cases import SendBaseEmailsManager
+from feature.components.managers import NotificationManager
 
 class EmailRepository:
-    def __init__(self, data_dir: str):
+    def __init__(self, data_dir: str, notify_callback: NotificationManager):
         self.data_dir = data_dir
+        self.notify_callback = notify_callback
         self.data_file = os.path.join(self.data_dir, "emails.json")
         self.ensure_data_dir_exists()
 
@@ -31,10 +33,11 @@ class EmailRepository:
             print(f"Erro ao salvar emails: {e}")
 
     def generate_report(self, email_list: List[Dict]):
-        print('Enviando o email')
+        self.notify_callback.show_notification('Iniciando Processo de Envio', 'yellow', 'black')
         SendBaseEmailsManager(
             email_list,
             'Acessos_PCO_Base_Completa.xlsx',
             'Relatório PCO Base Completa',
             'Olá,\n\nEste é um e-mail enviado automaticamente via Outlook.\n\nAtt,\nVP Finanças',
+            self.notify_callback.show_notification
         ).run()

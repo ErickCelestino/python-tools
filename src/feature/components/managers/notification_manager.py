@@ -1,4 +1,3 @@
-# notification_manager.py
 import flet as ft
 
 class NotificationManager:

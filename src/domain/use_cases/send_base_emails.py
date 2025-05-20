@@ -6,7 +6,7 @@ from .update_base import UpdateBaseManager
 from email.message import EmailMessage
 
 class SendBaseEmailsManager:
-    def __init__(self, emails, attachment_path, subject, body):
+    def __init__(self, emails, attachment_path, subject, body, notify_callback=None):
         # Outlook Settings (Microsoft 365)
         self.smtp_server = 'smtp.office365.com'
         self.smtp_port = 587
@@ -20,6 +20,11 @@ class SendBaseEmailsManager:
         self.body = body
 
         self.attachment_path = attachment_path
+
+        self.notify_callback = notify_callback or (lambda msg, bgcolor='': None)
+
+    def notify(self, message: str, bgcolor='green', text_color='white'):
+        self.notify_callback(message, bgcolor, text_color)
 
     def send_email(self):
         msg = EmailMessage()
@@ -41,7 +46,9 @@ class SendBaseEmailsManager:
                                    subtype=sub_type,
                                    filename=file_name)
         else:
-            print(f'⚠️ Arquivo não encontrado: {self.attachment_path}')
+            warning_message = f'⚠️ Arquivo não encontrado: {self.attachment_path}'
+            print(warning_message)
+            self.notify(msg, bgcolor='yellow', text_color='black')
             return
 
         recipients = [self.to_email] + self.emails
@@ -51,9 +58,13 @@ class SendBaseEmailsManager:
                 server.starttls()
                 server.login(self.smtp_user, self.smtp_password)
                 server.send_message(msg, from_addr=self.smtp_user, to_addrs=recipients)
-                print('✅ E-mail com anexo enviado com sucesso!')
+                sucess_message = '✅ E-mail com anexo enviado com sucesso!'
+                print(sucess_message)
+                self.notify(sucess_message, bgcolor='green')
         except Exception as e:
-            print(f'❌ Erro ao enviar e-mail: {e}')
+            error_msg = f'❌ Erro ao enviar e-mail: {e}'
+            print(error_msg)
+            self.notify(error_msg, bgcolor='red')
 
     def run(self):
         pythoncom.CoInitialize()

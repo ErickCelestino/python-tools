@@ -1,5 +1,9 @@
 import pandas as pd
+import logging
 from data_access import UpdateExcelList
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class UpdateBaseManager:
     def __init__(self):
@@ -20,20 +24,18 @@ class UpdateBaseManager:
     
     def update_lists(self):
         for row in self.list_to_update:
-            print(f'Acessando a planilha: {row['path']}')
+            logger.info(f"Acessando a planilha: {row['path']}")
             updateList = UpdateExcelList(row['path'])
             updateList.updateList()
 
     def read_bases(self):
         for row in self.list_to_update:
+            logger.info(f"Coletando dados da planilha: {row['path']}")
             if(row['id'] == 1):
-                print(f'Coletando dados da planilha: {row['path']}')
                 self.managers_list = pd.read_excel(row['path'])
             elif(row['id'] == 2):
-                print(f'Coletando dados da planilha: {row['path']}')
                 self.budget_sets = pd.read_excel(row['path'])
             elif(row['id'] == 3):
-                print(f'Coletando dados da planilha: {row['path']}')
                 self.references = pd.read_excel(row['path'])
 
     def transform_base(self):

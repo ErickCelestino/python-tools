@@ -7,13 +7,14 @@ from feature.components.managers import DialogManager, NotificationManager
 from feature.components.repositories import EmailRepository
 
 class PcoReport(ft.Column):
-    def __init__(self, page: Optional[ft.Page] = None, data_dir: str = ''):
+    def __init__(self, notification: NotificationManager, page: Optional[ft.Page] = None, data_dir: str = ''):
         super().__init__()
         self.page = page
         self.current_page = 1
         self.items_per_page = 10
+        self.notification = notification
 
-        self.repo = EmailRepository(data_dir)
+        self.repo = EmailRepository(data_dir, self.notification)
         self.email_list = self.repo.load_emails()
         self.loading_indicator = ft.ProgressRing(
             visible=False,

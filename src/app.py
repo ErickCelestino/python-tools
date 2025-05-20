@@ -1,6 +1,7 @@
 import flet as ft
 from feature.pages import HomePage, PcoReport
 from feature.components.menu_bar import MenuBar
+from feature.components.managers import NotificationManager
 
 class App(ft.Row):
     def __init__(self, page: ft.Page, data_dir):
@@ -8,13 +9,14 @@ class App(ft.Row):
         self.page = page
         self.expand = True
         self.data_dir = data_dir
+        self.notification = NotificationManager(self.page)
         self.render()
 
     def navigate(self, route: str):
         if route == "home":
             self.container_content.content = HomePage()
         elif route == "report_pco":
-            self.container_content.content = PcoReport(page=self.page, data_dir=self.data_dir)
+            self.container_content.content = PcoReport(notification=self.notification,page=self.page, data_dir=self.data_dir)
         self.page.update()
 
     def render(self):
