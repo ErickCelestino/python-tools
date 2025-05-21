@@ -1,11 +1,12 @@
 import flet as ft
+from feature.components.managers import ThemeManager
 
 class MenuBar(ft.Column):
-    def __init__(self, on_navigate):
+    def __init__(self, on_navigate, page: ft.Page):
         super().__init__()
         self.on_navigate = on_navigate
-        self.alignment = ft.MainAxisAlignment.START
         self.selected_index = 0
+        self.theme = ThemeManager(page)
 
     def build(self):
         self.options = [
@@ -23,11 +24,9 @@ class MenuBar(ft.Column):
             }
         ]
 
-        self.drawer = ft.NavigationRail(
+        drawer = ft.NavigationRail(
             selected_index=0,
             label_type=ft.NavigationRailLabelType.ALL,
-            min_width=80,
-            min_extended_width=400,
             group_alignment=0.9,
             height=120,
             destinations=[
@@ -37,10 +36,31 @@ class MenuBar(ft.Column):
                     label=option['title'],
                 ) for option in self.options
             ],
-            on_change=self._on_destination_selected
+            on_change=self._on_destination_selected,
+        )
+        
+        # button = ft.TextButton(
+        #     text='Escuro',
+        #     icon=ft.Icons.DARK_MODE,
+        #     on_click=self.theme.toggle_theme
+        # )
+        
+        # self.theme.theme_button = button
+        
+        # theme_button = ft.Container(
+        #     content=button,
+        # )
+
+        rail_layout = ft.Column(
+            controls=[
+                drawer,
+                self.theme.get_theme_control()
+            ],
+            expand=True,
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
         )
             
-        self.controls.append(self.drawer)
+        self.controls.append(rail_layout)
 
     def _on_destination_selected(self, e):
         index = e.control.selected_index
