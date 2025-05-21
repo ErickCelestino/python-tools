@@ -14,7 +14,7 @@ class App(ft.Row):
 
     def navigate(self, route: str):
         if route == "home":
-            self.container_content.content = HomePage()
+            self.container_content.content = HomePage(self.data_dir)
         elif route == "report_pco":
             self.container_content.content = PcoReport(notification=self.notification,page=self.page, data_dir=self.data_dir)
         self.page.update()
