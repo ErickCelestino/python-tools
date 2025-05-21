@@ -38,18 +38,6 @@ class MenuBar(ft.Column):
             ],
             on_change=self._on_destination_selected,
         )
-        
-        # button = ft.TextButton(
-        #     text='Escuro',
-        #     icon=ft.Icons.DARK_MODE,
-        #     on_click=self.theme.toggle_theme
-        # )
-        
-        # self.theme.theme_button = button
-        
-        # theme_button = ft.Container(
-        #     content=button,
-        # )
 
         rail_layout = ft.Column(
             controls=[
