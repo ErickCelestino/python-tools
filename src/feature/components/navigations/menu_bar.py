@@ -2,11 +2,11 @@ import flet as ft
 from feature.components.managers import ThemeManager
 
 class MenuBar(ft.Column):
-    def __init__(self, on_navigate, page: ft.Page):
+    def __init__(self, on_navigate, page: ft.Page, data_dir: str):
         super().__init__()
         self.on_navigate = on_navigate
         self.selected_index = 0
-        self.theme = ThemeManager(page)
+        self.theme = ThemeManager(page, data_dir)
 
     def build(self):
         self.options = [

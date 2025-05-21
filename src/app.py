@@ -20,7 +20,7 @@ class App(ft.Row):
         self.page.update()
 
     def render(self):
-        self.menu = MenuBar(on_navigate=self.navigate, page=self.page)
+        self.menu = MenuBar(on_navigate=self.navigate, page=self.page, data_dir=self.data_dir)
         self.container_content = ft.Container(expand=True)
 
         self.controls = [

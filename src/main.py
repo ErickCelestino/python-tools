@@ -10,7 +10,7 @@ def main(page: ft.Page):
     page.window.maximized = True
     page.horizontal_alignment = ft.CrossAxisAlignment.START
     page.vertical_alignment = ft.MainAxisAlignment.START
-    ThemeManager(page)
+    ThemeManager(page, dir)
     
     app = App(page, dir)
     page.add(app)
