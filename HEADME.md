@@ -2,7 +2,6 @@
 
 ## Coisas a Garantir
 - Preciso verificar os emails que serão disparados;
-- Preciso criar um forma de armazenar quando houve disparos;
 - Preciso criar uma home que indica dados calculados;
 - Preciso colocar para inicializar o aplicativo assim que abrir o computador;
 - Deixar o aplicativo rodando em background;
