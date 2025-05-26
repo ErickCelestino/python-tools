@@ -4,7 +4,7 @@ import os
 from datetime import datetime, timedelta
 import flet as ft
 
-from feature.components.handlers import ChartHandler
+from feature.components.handlers import HomeChartHandler
 
 class HomePage(ft.Column):
     def __init__(self, data_dir: str):
@@ -16,7 +16,7 @@ class HomePage(ft.Column):
         self.history_data = None
         self.expand = True
         self.spacing = 20
-        self.chart_handler = ChartHandler()
+        self.chart_handler = HomeChartHandler()
 
     def load_history(self) -> list:
         try:

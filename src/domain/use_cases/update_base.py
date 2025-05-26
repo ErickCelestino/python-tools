@@ -1,24 +1,27 @@
 import pandas as pd
 import logging
+from pathlib import Path
 from data_access import UpdateExcelList
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+project_root = Path(__file__).parent.parent.parent.parent
 
 class UpdateBaseManager:
     def __init__(self):
         self.list_to_update = [
             {
                 'id': 1,
-                'path': r'C:\Dev\Scripts\Python\python-tools\excel\PCO_Gestores.xlsx'
+                'path': str(project_root / 'excel' / 'PCO_Gestores.xlsx')
             },
             {
                 'id': 2,
-                'path': r'C:\Dev\Scripts\Python\python-tools\excel\PCO_Conjuntos.xlsx'
+                'path': str(project_root / 'excel' / 'PCO_Conjuntos.xlsx')
             },
             {
                 'id': 3,
-                'path': r'C:\Dev\Scripts\Python\python-tools\excel\PCO_Referencias.xlsx'
+                'path': str(project_root / 'excel' / 'PCO_Referencias.xlsx')
             }
         ]
     
