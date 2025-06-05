@@ -1,7 +1,7 @@
-from domain import SendBaseEmailsManager
+from domain import AnalysisOfGiocondaWithArgyrus
 
 def main():
-    renderDashboard = SendBaseEmailsManager()
+    renderDashboard = AnalysisOfGiocondaWithArgyrus()
     renderDashboard.run()
 
 if __name__ == "__main__":
