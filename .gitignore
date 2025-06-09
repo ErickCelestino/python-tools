@@ -157,6 +157,10 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 
+/excel
+
+/data
+
 # Cython debug symbols
 cython_debug/
 
@@ -174,4 +178,8 @@ cython_debug/
 .pypirc
 service-account.json
 
+# Others
 *.xlsx
+*.csv
+/out
+/data

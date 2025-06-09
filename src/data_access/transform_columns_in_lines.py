@@ -1,7 +1,7 @@
 import pandas as pd
 
 class TransformColumnsInLines:
-    def __init__(self, dataFrame, fixedColumns, excelPath):
+    def __init__(self, dataFrame: pd.DataFrame, fixedColumns: list[str], excelPath: str):
         self.df = dataFrame
         self.fixedColumns = fixedColumns
         self.excelPath = excelPath
@@ -16,5 +16,7 @@ class TransformColumnsInLines:
             var_name='Atributo',
             value_name='Valor'
         )
-
+        
+        df_melted = df_melted.dropna(subset=['Valor'])
+        df_melted = df_melted[df_melted['Valor'].astype(str).str.strip() != ''] 
         df_melted.to_excel(self.excelPath, index=False)
