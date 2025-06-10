@@ -2,13 +2,13 @@ import threading
 from typing import Optional
 import flet as ft
 
-from feature.components.handlers import EmailDialogHandler
+from feature.components.handlers import PcoDialogHandler
 from feature.components.repositories import EmailRepository
 
 class PcoAppBar(ft.Column):
-    def __init__(self, email_dialog_handler: EmailDialogHandler, repo: EmailRepository, loading_indicator: ft.ProgressRing, email_list: list, page: Optional[ft.Page] = None):
+    def __init__(self, pco_dialog_handler: PcoDialogHandler, repo: EmailRepository, loading_indicator: ft.ProgressRing, email_list: list, page: Optional[ft.Page] = None):
         super().__init__()
-        self.email_dialog_handler = email_dialog_handler
+        self.pco_dialog_handler = pco_dialog_handler
         self.repo = repo
         self.loading_indicator = loading_indicator
         self.email_list = email_list
@@ -40,6 +40,12 @@ class PcoAppBar(ft.Column):
                 center_title=False,
                 actions=[
                     ft.IconButton(
+                        ft.Icons.COMPARE_SHARP,
+                        icon_size=25,
+                        tooltip='Comparar Bases',
+                        on_click=lambda e: self.pco_dialog_handler.open_compare_bases()
+                    ),
+                    ft.IconButton(
                         ft.Icons.MAIL_SHARP,
                         icon_size=25,
                         tooltip='Enviar Relatório',
@@ -49,7 +55,7 @@ class PcoAppBar(ft.Column):
                         ft.Icons.ADD_CIRCLE,
                         icon_size=25,
                         tooltip='Adicionar Email',
-                        on_click=lambda e: self.email_dialog_handler.open_add_modal(e, self.email_list)
+                        on_click=lambda e: self.pco_dialog_handler.open_add_modal(e, self.email_list)
                     ),
                 ]
             )

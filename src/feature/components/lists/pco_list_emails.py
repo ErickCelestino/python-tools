@@ -1,10 +1,10 @@
 from typing import Optional
 import flet as ft
 
-from feature.components.handlers import EmailDialogHandler
+from feature.components.handlers import PcoDialogHandler
 
 class PcoListEmails(ft.Column):
-    def __init__(self, email_list: list, email_dialog_handler: EmailDialogHandler, refresh_list, page: Optional[ft.Page] = None):
+    def __init__(self, email_list: list, email_dialog_handler: PcoDialogHandler, refresh_list, page: Optional[ft.Page] = None):
         super().__init__()
         self.current_page = 1
         self.items_per_page = 10

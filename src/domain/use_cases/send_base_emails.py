@@ -4,7 +4,7 @@ import smtplib
 import pythoncom
 import logging
 from email.message import EmailMessage
-from .update_base import UpdateBaseManager
+from .pco import UpdateBaseManager
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
