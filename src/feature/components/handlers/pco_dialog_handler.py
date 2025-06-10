@@ -2,6 +2,8 @@ import re
 import flet as ft
 from typing import Optional, Dict, List, Callable
 from datetime import datetime
+
+from domain.use_cases import PcoBaseAnalysisManager
 from ..managers import DialogManager, NotificationManager
 
 class PcoDialogHandler:
@@ -11,6 +13,7 @@ class PcoDialogHandler:
         self.notification_manager = notification_manager
         self.refresh_callback = refresh_callback
         self.selected_item: Optional[Dict] = None
+        self.selected_file_name_text = ft.Text("Nenhum arquivo selecionado.")
         self.file_picker = ft.FilePicker(on_result=self._on_file_selected)
         self.page.overlay.append(self.file_picker)
         self.selected_file_path: Optional[str] = None
@@ -58,17 +61,20 @@ class PcoDialogHandler:
     def _on_file_selected(self, e: ft.FilePickerResultEvent):
         if e.files:
             self.selected_file_path = e.files[0].path
-            self.notification_manager.show_notification(f"Arquivo selecionado: {self.selected_file_path}", "green")
+            file_name = e.files[0].name
+            self.selected_file_name_text.value = f"Arquivo selecionado: {file_name}"
+            self.refresh_callback()
         else:
-            self.notification_manager.show_notification("Nenhum arquivo selecionado.", "red")
+            self.selected_file_path = None
+            self.selected_file_name_text.value = "Nenhum arquivo selecionado."
 
     def _handle_compare_file(self, dialog: ft.Control, e: ft.ControlEvent):
         if not self.selected_file_path:
             self.notification_manager.show_notification("Nenhum arquivo selecionado.", "red")
             return
 
-        # Aqui você pode usar self.selected_file_path para continuar o processamento
         self.notification_manager.show_notification(f"Processando: {self.selected_file_path}", "blue")
+        PcoBaseAnalysisManager(excel_path=self.selected_file_path).run()
         self.dialog_manager.dismiss_dialog(dialog, e)
         self.refresh_callback()
 
@@ -145,6 +151,7 @@ class PcoDialogHandler:
             content=ft.Container(
                 content=ft.Column([
                     ft.Text("Escolha um arquivo para comparar:"),
+                    self.selected_file_name_text,
                     select_file_button
                 ]),
                 padding=20
