@@ -89,7 +89,6 @@ class PcoBaseAnalysisManager:
                     found.append(nova_linha)
                     
                     id_aux = id_aux + 1
-
             else:
                 not_found.append({
                     'Filial': branch,
@@ -102,7 +101,7 @@ class PcoBaseAnalysisManager:
                 })
                 sys.stdout.write(f"\rProcessados {i}/{total_row} clientes ({i/total_row:.1%})...\r")
                 sys.stdout.flush()
-                
+        sys.stdout.write(f"\rProcessados {total_row}/{total_row} clientes ({total_row/total_row:.1%})...\r") 
         self.save_bases(found, not_found)
     
     def handle_references(self):
@@ -122,7 +121,20 @@ class PcoBaseAnalysisManager:
     def update_base(self):
         pythoncom.CoInitialize()
         try:
-            UpdateBaseManager().run()
+            UpdateBaseManager(list_to_update=[
+            {
+                'id': 1,
+                'path': self.manager_path
+            },
+            {
+                'id': 2,
+                'path': self.budget_set_path
+            },
+            {
+                'id': 3,
+                'path': self.references_path
+            }
+        ]).run()
         finally:
             pythoncom.CoUninitialize()   
     
