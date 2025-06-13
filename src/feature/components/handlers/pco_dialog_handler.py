@@ -74,7 +74,7 @@ class PcoDialogHandler:
             return
 
         self.notification_manager.show_notification(f"Processando: {self.selected_file_path}", "blue")
-        PcoBaseAnalysisManager(excel_path=self.selected_file_path).run()
+        PcoBaseAnalysisManager(excel_path=self.selected_file_path, notify_callback=self.notification_manager).run()
         self.dialog_manager.dismiss_dialog(dialog, e)
         self.refresh_callback()
 

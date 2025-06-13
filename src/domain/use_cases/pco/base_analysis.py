@@ -1,6 +1,11 @@
+import sys
 import pandas as pd
 from pathlib import Path
 import logging
+import pythoncom
+
+from domain.use_cases.pco import UpdateBaseManager
+from feature.components.managers import NotificationManager
 
 logging.basicConfig(
     level=logging.INFO,
@@ -9,19 +14,25 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-project_root = Path(__file__).parent.parent.parent.parent
+project_root = Path(__file__).resolve().parents[4]
 
 class PcoBaseAnalysisManager:
-    def __init__(self, excel_path: str):
+    def __init__(self, excel_path: str, notify_callback: NotificationManager=None):
         self.excel_path = excel_path
         self.df = None
-        self.budget_set =  str(project_root / 'excel' / 'PCO_Conjuntos.xlsx')
-        self.manager = str(project_root / 'excel' / 'PCO_Gestores.xlsx')
-        self.references = str(project_root / 'excel' / 'PCO_Referencias.xlsx')
+        self.notify_callback = notify_callback
+        self.budget_set_path =  str(project_root / 'excel' / 'PCO_Conjuntos.xlsx')
+        self.manager_path = str(project_root / 'excel' / 'PCO_Gestores.xlsx')
+        self.references_path = str(project_root / 'excel' / 'PCO_Referencias.xlsx')
     
     def read_excel(self):
-        excel = pd.read_excel(self.excel_path)
-        self.df = excel
+        self.df = pd.read_excel(self.excel_path)
+        self.budget_set = pd.read_excel(self.budget_set_path)
+        self.manager = pd.read_excel(self.manager_path)
+        self.references = pd.read_excel(self.references_path)
+    
+    def notify(self, message: str, bgcolor='green', text_color='white'):
+        self.notify_callback.show_notification(message, bgcolor, text_color)
         
     def save_bases(self, found: list, not_found = list):
         found = pd.DataFrame(found)
@@ -32,17 +43,23 @@ class PcoBaseAnalysisManager:
 
         if(len(not_found) > 0 ):
             not_found.to_excel('naoEncontrados.xlsx', index=False, engine='openpyxl')
+
+        self.notify(f"Dados processados com sucesso!", bgcolor='green')
     
     def handle_bases(self):
         found = []
         not_found = []
-        logger.info(f"Excel carregado com {len(self.df)} linhas.")
+        total_row = len(self.df)
+        self.notify(f"Excel carregado com {total_row} linhas.", bgcolor='yellow', text_color='black')
+        id_aux = int(self.references['ID_AUX'].iloc[-1]) + 1
+        
+        self.df.columns = [col.replace(' ', '_') for col in self.df.columns]
         for i, row, in enumerate(self.df.itertuples(index=False)):
             group_row = row._asdict()
             branch = group_row.get('Filial')
             account = group_row.get('Conta')
             verb = group_row.get('Verba')
-            cost_center = group_row.get('Centro_De_Custo')
+            cost_center = group_row.get('Centro_de_Custo')
             bu = group_row.get('BU')
             cd_sheet = group_row.get('CD_Planilha')
             email = group_row['emails']
@@ -74,8 +91,18 @@ class PcoBaseAnalysisManager:
                     id_aux = id_aux + 1
 
             else:
-                not_found.append({ 'id': row['ID'] })
-
+                not_found.append({
+                    'Filial': branch,
+                    'Conta': account,
+                    'Verba': verb,
+                    'Centro_De_Custo': cost_center,
+                    'BU': bu,
+                    'CD_Planilha': cd_sheet,
+                    'emails': email
+                })
+                sys.stdout.write(f"\rProcessados {i}/{total_row} clientes ({i/total_row:.1%})...\r")
+                sys.stdout.flush()
+                
         self.save_bases(found, not_found)
     
     def handle_references(self):
@@ -92,7 +119,15 @@ class PcoBaseAnalysisManager:
         df_melted = df_melted.drop_duplicates()
         self.df = df_melted
     
+    def update_base(self):
+        pythoncom.CoInitialize()
+        try:
+            UpdateBaseManager().run()
+        finally:
+            pythoncom.CoUninitialize()   
+    
     def run(self):
+        self.update_base()
         self.read_excel()
         self.handle_references()
         self.handle_bases()        
