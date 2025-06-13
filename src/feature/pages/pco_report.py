@@ -1,11 +1,7 @@
 import flet as ft
 from typing import Optional
 
-from feature.components.handlers import EmailDialogHandler
-from feature.components.managers import DialogManager, NotificationManager
-from feature.components.repositories import EmailRepository
-from feature.components.navigations import PcoAppBar
-from feature.components.lists import PcoListEmails
+from feature.components import PcoDialogHandler, DialogManager, NotificationManager, EmailRepository, PcoAppBar,PcoListEmails
 
 class PcoReport(ft.Column):
     def __init__(self, notification: NotificationManager, page: Optional[ft.Page] = None, data_dir: str = ''):
@@ -24,7 +20,7 @@ class PcoReport(ft.Column):
         
         self.dialog_manager = DialogManager(page)
         self.notification_manager = NotificationManager(page)
-        self.email_dialog_handler = EmailDialogHandler(
+        self.email_dialog_handler = PcoDialogHandler(
             page,
             dialog_manager=self.dialog_manager,
             notification_manager=self.notification_manager,

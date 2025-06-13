@@ -1,10 +1,13 @@
 import mimetypes
 import os
+from pathlib import Path
 import smtplib
 import pythoncom
 import logging
 from email.message import EmailMessage
-from .update_base import UpdateBaseManager
+from .pco import UpdateBaseManager, GenerateExcelBase
+
+project_root = Path(__file__).resolve().parents[3]
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -22,6 +25,21 @@ class SendBaseEmailsManager:
         self.emails = emails
         self.subject = subject
         self.body = body
+        
+        self.list_to_update = [
+            {
+                'id': 1,
+                'path': str(project_root / 'excel' / 'PCO_Gestores.xlsx')
+            },
+            {
+                'id': 2,
+                'path': str(project_root / 'excel' / 'PCO_Conjuntos.xlsx')
+            },
+            {
+                'id': 3,
+                'path': str(project_root / 'excel' / 'PCO_Referencias.xlsx')
+            }
+        ]
 
         self.attachment_path = attachment_path
 
@@ -73,7 +91,8 @@ class SendBaseEmailsManager:
     def run(self):
         pythoncom.CoInitialize()
         try:
-            UpdateBaseManager().run()
+            UpdateBaseManager(list_to_update=self.list_to_update).run()
+            GenerateExcelBase(list_to_update=self.list_to_update).run()
             self.send_email()
         finally:
             pythoncom.CoUninitialize()

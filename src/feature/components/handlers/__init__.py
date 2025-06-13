@@ -1,7 +1,7 @@
-from .email_dialog_handler import EmailDialogHandler
+from .pco_dialog_handler import PcoDialogHandler
 from .home_chart_handler import HomeChartHandler
 
 __all__ = [
- 'EmailDialogHandler',
+ 'PcoDialogHandler',
  'HomeChartHandler',
 ]
