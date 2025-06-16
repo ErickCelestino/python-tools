@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 project_root = Path(__file__).resolve().parents[4]
 
 class PcoBaseAnalysisManager:
-    def __init__(self, excel_path: str, notify_callback: NotificationManager=None):
+    def __init__(self, excel_path: str, notify_callback=None):
         self.excel_path = excel_path
         self.df = None
-        self.notify_callback = notify_callback
+        self.notify_callback = notify_callback or (lambda msg, bgcolor='': None)
         self.budget_set_path =  str(project_root / 'excel' / 'PCO_Conjuntos.xlsx')
         self.manager_path = str(project_root / 'excel' / 'PCO_Gestores.xlsx')
         self.references_path = str(project_root / 'excel' / 'PCO_Referencias.xlsx')
@@ -31,8 +31,8 @@ class PcoBaseAnalysisManager:
         self.manager = pd.read_excel(self.manager_path)
         self.references = pd.read_excel(self.references_path)
     
-    def notify(self, message: str, bgcolor='green', text_color='white'):
-        self.notify_callback.show_notification(message, bgcolor, text_color)
+    def _notify(self, message: str, bgcolor='green', text_color='white'):
+        self.notify_callback(message, bgcolor, text_color)
         
     def save_bases(self, found: list, not_found = list):
         found = pd.DataFrame(found)
@@ -44,13 +44,13 @@ class PcoBaseAnalysisManager:
         if(len(not_found) > 0 ):
             not_found.to_excel('naoEncontrados.xlsx', index=False, engine='openpyxl')
 
-        self.notify(f"Dados processados com sucesso!", bgcolor='green')
+        self._notify(f"Dados processados com sucesso!", bgcolor='green')
     
     def handle_bases(self):
         found = []
         not_found = []
         total_row = len(self.df)
-        self.notify(f"Excel carregado com {total_row} linhas.", bgcolor='yellow', text_color='black')
+        self._notify(f"Excel carregado com {total_row} linhas.", bgcolor='yellow', text_color='black')
         id_aux = int(self.references['ID_AUX'].iloc[-1]) + 1
         
         self.df.columns = [col.replace(' ', '_') for col in self.df.columns]

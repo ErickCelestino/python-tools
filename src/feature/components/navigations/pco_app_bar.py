@@ -4,7 +4,6 @@ import flet as ft
 
 from feature.components.handlers import PcoDialogHandler
 from feature.components.repositories import EmailRepository
-from domain.use_cases import PcoCheckReferences
 
 class PcoAppBar(ft.Column):
     def __init__(self, pco_dialog_handler: PcoDialogHandler, repo: EmailRepository, loading_indicator: ft.ProgressRing, email_list: list, page: Optional[ft.Page] = None):
@@ -15,9 +14,16 @@ class PcoAppBar(ft.Column):
         self.email_list = email_list
         self.page = page
 
-    def send_report_with_loading(self, e):
+    def _init_loading(self):
         self.loading_indicator.visible = True
         self.page.update()
+        
+    def __end_loading(self):
+        self.loading_indicator.visible = False
+        self.page.update()
+
+    def send_report_with_loading(self, e):
+        self._init_loading()
         emails = []
         for item in self.email_list:
             emails.append(item['email'])
@@ -28,13 +34,14 @@ class PcoAppBar(ft.Column):
             except Exception as err:
                 print(f"Erro ao enviar relatório: {err}")
             finally:
-                self.loading_indicator.visible = False
-                self.page.update()
+                self.__end_loading()
                 
         threading.Thread(target=task, daemon=True).start()
 
     def check_references(self):
-        PcoCheckReferences().run()
+        self._init_loading()
+        self.pco_dialog_handler.open_check_references()
+        self.__end_loading()
     
     def build(self):
         return ft.AppBar(
