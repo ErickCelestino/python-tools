@@ -1,4 +1,4 @@
-from .pco import UpdateBaseManager, PcoBaseAnalysisManager, GenerateExcelBase
+from .pco import UpdateBaseManager, PcoBaseAnalysisManager, GenerateExcelBase, PcoCheckReferences
 from .send_base_emails import SendBaseEmailsManager
 
 __all__ = [
@@ -6,4 +6,5 @@ __all__ = [
  'PcoBaseAnalysisManager',
  'SendBaseEmailsManager',
  'GenerateExcelBase',
+ 'PcoCheckReferences',
 ]

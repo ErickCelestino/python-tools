@@ -3,7 +3,7 @@ import flet as ft
 from typing import Optional, Dict, List, Callable
 from datetime import datetime
 
-from domain.use_cases import PcoBaseAnalysisManager
+from domain.use_cases import PcoBaseAnalysisManager, PcoCheckReferences
 from ..managers import DialogManager, NotificationManager
 
 class PcoDialogHandler:
@@ -74,7 +74,7 @@ class PcoDialogHandler:
             return
 
         self.notification_manager.show_notification(f"Processando: {self.selected_file_path}", "blue")
-        PcoBaseAnalysisManager(excel_path=self.selected_file_path, notify_callback=self.notification_manager).run()
+        PcoBaseAnalysisManager(excel_path=self.selected_file_path, notify_callback=self.notification_manager.show_notification).run()
         self.dialog_manager.dismiss_dialog(dialog, e)
         self.refresh_callback()
 
@@ -162,3 +162,6 @@ class PcoDialogHandler:
             ]
         )
         self.dialog_manager.show_dialog(dialog)
+    
+    def open_check_references(self):
+        PcoCheckReferences(notify_callback=self.notification_manager.show_notification).run()

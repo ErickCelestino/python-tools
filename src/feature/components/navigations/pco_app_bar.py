@@ -14,9 +14,16 @@ class PcoAppBar(ft.Column):
         self.email_list = email_list
         self.page = page
 
-    def send_report_with_loading(self, e):
+    def _init_loading(self):
         self.loading_indicator.visible = True
         self.page.update()
+        
+    def __end_loading(self):
+        self.loading_indicator.visible = False
+        self.page.update()
+
+    def send_report_with_loading(self, e):
+        self._init_loading()
         emails = []
         for item in self.email_list:
             emails.append(item['email'])
@@ -27,11 +34,15 @@ class PcoAppBar(ft.Column):
             except Exception as err:
                 print(f"Erro ao enviar relatório: {err}")
             finally:
-                self.loading_indicator.visible = False
-                self.page.update()
+                self.__end_loading()
                 
         threading.Thread(target=task, daemon=True).start()
 
+    def check_references(self):
+        self._init_loading()
+        self.pco_dialog_handler.open_check_references()
+        self.__end_loading()
+    
     def build(self):
         return ft.AppBar(
                 leading=ft.Icon(ft.Icons.DOCUMENT_SCANNER),
@@ -39,6 +50,12 @@ class PcoAppBar(ft.Column):
                 title=ft.Text("PCO Relatório"),
                 center_title=False,
                 actions=[
+                    ft.IconButton(
+                        ft.Icons.CHECK_SHARP,
+                        icon_size=25,
+                        tooltip='Verificar Referencias',
+                        on_click=lambda e: self.check_references()
+                    ),
                     ft.IconButton(
                         ft.Icons.COMPARE_SHARP,
                         icon_size=25,
