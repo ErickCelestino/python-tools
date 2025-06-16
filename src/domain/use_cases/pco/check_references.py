@@ -1,5 +1,7 @@
 from pathlib import Path
 import pandas as pd
+import pythoncom
+from domain.use_cases.pco import UpdateBaseManager
 
 project_root = Path(__file__).resolve().parents[4]
 
@@ -26,6 +28,7 @@ class PcoCheckReferences:
             })
     
     def read_excel(self):
+        self._notify("⚠️ Lendo dados das bases", bgcolor='yellow', text_color='black')
         self.budget_set = pd.read_excel(self.budget_set_path)
         self.manager = pd.read_excel(self.manager_path)
         self.references = pd.read_excel(self.references_path)
@@ -49,8 +52,29 @@ class PcoCheckReferences:
     
             self._add_not_found(verifiedManager, data_ids)
             self._add_not_found(varifiedBudgetSet, data_ids)
-            
+    
+    def update_base(self):
+        pythoncom.CoInitialize()
+        try:
+            UpdateBaseManager(list_to_update=[
+            {
+                'id': 1,
+                'path': self.manager_path
+            },
+            {
+                'id': 2,
+                'path': self.budget_set_path
+            },
+            {
+                'id': 3,
+                'path': self.references_path
+            }
+        ]).run()
+        finally:
+            pythoncom.CoUninitialize() 
+    
     def run(self):
+        self.update_base()
         self.read_excel()
         self.check_references()
         self.create_not_found_references_file()

@@ -5,7 +5,6 @@ import logging
 import pythoncom
 
 from domain.use_cases.pco import UpdateBaseManager
-from feature.components.managers import NotificationManager
 
 logging.basicConfig(
     level=logging.INFO,
