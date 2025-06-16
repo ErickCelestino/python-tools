@@ -4,6 +4,7 @@ import flet as ft
 
 from feature.components.handlers import PcoDialogHandler
 from feature.components.repositories import EmailRepository
+from domain.use_cases import PcoCheckReferences
 
 class PcoAppBar(ft.Column):
     def __init__(self, pco_dialog_handler: PcoDialogHandler, repo: EmailRepository, loading_indicator: ft.ProgressRing, email_list: list, page: Optional[ft.Page] = None):
@@ -32,6 +33,9 @@ class PcoAppBar(ft.Column):
                 
         threading.Thread(target=task, daemon=True).start()
 
+    def check_references(self):
+        PcoCheckReferences().run()
+    
     def build(self):
         return ft.AppBar(
                 leading=ft.Icon(ft.Icons.DOCUMENT_SCANNER),
@@ -39,6 +43,12 @@ class PcoAppBar(ft.Column):
                 title=ft.Text("PCO Relatório"),
                 center_title=False,
                 actions=[
+                    ft.IconButton(
+                        ft.Icons.CHECK_SHARP,
+                        icon_size=25,
+                        tooltip='Verificar Referencias',
+                        on_click=lambda e: self.check_references()
+                    ),
                     ft.IconButton(
                         ft.Icons.COMPARE_SHARP,
                         icon_size=25,
